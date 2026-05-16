@@ -1,0 +1,72 @@
+# Manulife-linked fund universe to track.
+# Add / remove funds to match the ILAS or savings-plan menus your clients hold.
+# ISIN can be looked up on each fund's Product Information Booklet (PIB).
+# `benchmark` is a Yahoo Finance ticker used for relative-strength comparisons.
+
+funds:
+  - code: MGF-USEQ
+    isin: HK0000056226
+    name: Manulife Global Fund - US Equity
+    category: equity
+    region: us
+    currency: USD
+    benchmark: ^GSPC
+
+  - code: MGF-GREQ
+    isin: HK0000056234
+    name: Manulife Global Fund - Greater China Equity
+    category: equity
+    region: greater_china
+    currency: USD
+    benchmark: 000300.SS
+
+  - code: MGF-EUEQ
+    isin: HK0000056242
+    name: Manulife Global Fund - European Growth
+    category: equity
+    region: europe
+    currency: EUR
+    benchmark: ^STOXX50E
+
+  - code: MGF-ASEQ
+    isin: HK0000056259
+    name: Manulife Global Fund - Asia Pacific ex-Japan Equity
+    category: equity
+    region: asia_ex_japan
+    currency: USD
+    benchmark: AAXJ
+
+  - code: MGF-GLBD
+    isin: HK0000056267
+    name: Manulife Global Fund - Global Bond
+    category: bond
+    region: global
+    currency: USD
+    benchmark: AGG
+
+  - code: MGF-USHY
+    isin: HK0000056275
+    name: Manulife Global Fund - US High Yield Bond
+    category: bond
+    region: us
+    currency: USD
+    benchmark: HYG
+
+  - code: MGF-ASBD
+    isin: HK0000056283
+    name: Manulife Global Fund - Asian High Yield Bond
+    category: bond
+    region: asia
+    currency: USD
+    benchmark: EMHY
+
+  - code: MGF-MIX50
+    isin: HK0000056291
+    name: Manulife Global Fund - Balanced (50/50)
+    category: balanced
+    region: global
+    currency: USD
+    benchmark: AOR
+
+# NOTE: ISINs above are illustrative placeholders. Replace each with the real
+# ISIN from the fund's PIB before going live.

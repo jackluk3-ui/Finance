@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+           color: #222; max-width: 900px; margin: 32px auto; padding: 0 16px; line-height: 1.5; }
+    h1 { color: #1f4e79; margin-bottom: 4px; }
+    h2 { color: #1f4e79; border-bottom: 2px solid #e3eaf2; padding-bottom: 6px; margin-top: 32px; }
+    h3 { color: #555; margin-top: 24px; }
+    .meta { color: #888; font-size: 13px; margin-bottom: 24px; }
+    .commentary { background: #f5f8fb; border-left: 4px solid #1f4e79;
+                  padding: 12px 16px; margin: 12px 0; }
+    .commentary ul { margin: 4px 0; padding-left: 20px; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 14px; }
+    th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #e3eaf2; }
+    th { background: #f0f4f8; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .pos { color: #2e7d32; }
+    .neg { color: #c62828; }
+    img.chart { display: block; margin: 12px 0; max-width: 100%; }
+    .disclaimer { background: #fff8e1; border: 1px solid #f0d27a; padding: 12px 16px;
+                  font-size: 12px; color: #6b5300; margin-top: 32px; border-radius: 4px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px;
+             background: #e3eaf2; color: #1f4e79; font-size: 11px; margin-right: 4px; }
+  </style>
+</head>
+<body>
+  <h1>{{ title }}</h1>
+  <div class="meta">Generated {{ generated_at }} · Lookback {{ lookback_days }} days · {{ fund_count }} funds tracked</div>
+
+  {% block content %}{% endblock %}
+
+  <div class="disclaimer">
+    <strong>Disclaimer.</strong> This report contains market observations and
+    quantitative signals derived from publicly available data. It is not, and
+    should not be construed as, personalised investment advice or an offer to
+    buy or sell any security. Past performance does not guarantee future
+    results. All recommendations to clients must be reviewed and signed off by
+    a licensed adviser in accordance with local regulations.
+  </div>
+</body>
+</html>

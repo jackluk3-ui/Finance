@@ -1,0 +1,51 @@
+# Pipeline settings. Keys may be overridden by environment variables of the
+# same name in upper-case (e.g. HTTP_TIMEOUT).
+
+http:
+  timeout: 20
+  user_agent: "ManulifeAnalyzer/0.1 (contact: your-email@example.com)"
+  cache_hours: 24
+  rate_limit_seconds: 1.5     # min delay between Manulife requests
+
+storage:
+  database_path: data/manulife.db
+
+# Lookback windows used in analysis
+analysis:
+  return_windows_days: [7, 30, 90, 180, 365]
+  volatility_window_days: 30
+  sharpe_window_days: 90
+  risk_free_series: DGS3MO    # FRED 3-month Treasury
+  momentum_window_days: 90
+  drawdown_window_days: 365
+
+# Macro series to pull from FRED (id -> friendly name)
+fred_series:
+  DGS10: "US 10Y Treasury Yield"
+  DGS2: "US 2Y Treasury Yield"
+  DGS3MO: "US 3M Treasury Yield"
+  T10Y2Y: "10Y-2Y Yield Curve Spread"
+  CPIAUCSL: "US CPI (All Items)"
+  UNRATE: "US Unemployment Rate"
+  DFF: "Fed Funds Effective Rate"
+
+# Benchmark tickers from Yahoo for the macro context section
+benchmark_tickers:
+  - ^GSPC      # S&P 500
+  - ^STOXX50E  # Euro Stoxx 50
+  - ^HSI       # Hang Seng
+  - 000300.SS  # CSI 300
+  - ^N225      # Nikkei 225
+  - AGG        # US Aggregate Bond
+  - HYG        # US High Yield
+  - GLD        # Gold
+  - DX-Y.NYB   # US Dollar Index
+
+reports:
+  output_dir: data/reports
+  weekly:
+    lookback_days: 7
+    top_n_funds: 5
+  monthly:
+    lookback_days: 30
+    top_n_funds: 10

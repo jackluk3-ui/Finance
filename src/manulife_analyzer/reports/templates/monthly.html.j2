@@ -1,0 +1,81 @@
+{% extends "base.html.j2" %}
+
+{% block content %}
+<h2>Executive summary</h2>
+<div class="commentary">
+  <ul>
+    {% for line in macro.commentary %}<li>{{ line }}</li>{% endfor %}
+    {% if volatility_alert %}<li><strong>Volatility alert:</strong> {{ volatility_alert }}</li>{% endif %}
+  </ul>
+</div>
+
+<h2>Global macro context</h2>
+{% if macro_charts %}
+  {% for chart in macro_charts %}
+    <img class="chart" src="{{ chart }}" alt="macro chart">
+  {% endfor %}
+{% else %}
+  <p>No FRED data loaded.</p>
+{% endif %}
+
+<h2>Fund performance — last {{ lookback_days }} days</h2>
+{% if return_chart %}
+  <img class="chart" src="{{ return_chart }}" alt="returns">
+{% endif %}
+<table>
+  <thead>
+    <tr>
+      <th>Fund</th>
+      <th>Category</th>
+      <th class="num">Return ({{ lookback_days }}D)</th>
+      <th class="num">YTD-ish (180D)</th>
+      <th class="num">Vol (ann.)</th>
+      <th class="num">Sharpe 90D</th>
+      <th class="num">Max DD 1Y</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in fund_table %}
+    <tr>
+      <td>{{ row.name }}</td>
+      <td><span class="badge">{{ row.category }}</span><span class="badge">{{ row.region }}</span></td>
+      <td class="num {{ 'pos' if row.return_pct and row.return_pct >= 0 else 'neg' }}">
+        {{ "{:+.2f}%".format(row.return_pct * 100) if row.return_pct is not none else "—" }}
+      </td>
+      <td class="num {{ 'pos' if row.return_180d and row.return_180d >= 0 else 'neg' }}">
+        {{ "{:+.2f}%".format(row.return_180d * 100) if row.return_180d is not none else "—" }}
+      </td>
+      <td class="num">{{ "{:.1f}%".format(row.vol * 100) if row.vol is not none else "—" }}</td>
+      <td class="num">{{ "{:.2f}".format(row.sharpe) if row.sharpe is not none else "—" }}</td>
+      <td class="num neg">{{ "{:.1f}%".format(row.max_dd * 100) if row.max_dd is not none else "—" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Short-term screening candidates</h2>
+<table>
+  <thead><tr><th>#</th><th>Fund</th><th class="num">Score</th><th>Notes</th></tr></thead>
+  <tbody>
+    {% for r in candidates_short %}
+    <tr>
+      <td>{{ loop.index }}</td><td>{{ r.name }}</td>
+      <td class="num">{{ "{:.2f}".format(r.score) }}</td><td>{{ r.rationale }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Risk-adjusted candidates (longer horizon)</h2>
+<table>
+  <thead><tr><th>#</th><th>Fund</th><th class="num">Score</th><th>Notes</th></tr></thead>
+  <tbody>
+    {% for r in candidates_long %}
+    <tr>
+      <td>{{ loop.index }}</td><td>{{ r.name }}</td>
+      <td class="num">{{ "{:.2f}".format(r.score) }}</td><td>{{ r.rationale }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
