@@ -27,9 +27,7 @@ uv.lock
 .env.local
 
 # Data & artifacts (do not commit live market data or client reports)
-data/raw/
-data/processed/
-data/reports/
+data/
 *.db
 *.sqlite
 *.sqlite3
