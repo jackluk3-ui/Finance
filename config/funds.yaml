@@ -108,7 +108,7 @@ funds:
     benchmark: INDA
     risk_level: 5
 
-  # ── 亞洲 / 日本 ───────────────────────────────────────────
+  # ── 亞洲 / 日本 / 韓國 / 台灣（半導體重倉地區）───────────────
   - code: MGF-ASEQ
     isin: PLACEHOLDER-MGF-ASEQ
     name: Manulife Global Fund - Asia Pacific ex-Japan Equity
@@ -127,6 +127,35 @@ funds:
     currency: USD
     benchmark: EWJ
     risk_level: 4
+  - code: MGF-KREQ
+    isin: PLACEHOLDER-MGF-KREQ
+    name: Manulife Global Fund - Korean Equity
+    name_zh: 宏利環球基金 - 韓國股票
+    category: equity
+    region: korea
+    currency: USD
+    benchmark: EWY              # 三星 + SK Hynix 佔 KOSPI 大部份權重
+    theme: semiconductor        # 韓國股市實際係半導體重倉
+    risk_level: 5
+  - code: MGF-TWEQ
+    isin: PLACEHOLDER-MGF-TWEQ
+    name: Manulife Global Fund - Taiwan Equity
+    name_zh: 宏利環球基金 - 台灣股票
+    category: equity
+    region: taiwan
+    currency: USD
+    benchmark: EWT              # 台積電 ~30% 權重
+    theme: semiconductor
+    risk_level: 5
+  - code: FSF-ASGRW
+    isin: PLACEHOLDER-FSF-ASGRW
+    name: First Sentier Asian Growth
+    name_zh: 首域亞洲增長基金
+    category: equity
+    region: asia_ex_japan
+    currency: USD
+    benchmark: AAXJ
+    risk_level: 5
 
   # ── 歐洲 ─────────────────────────────────────────────────
   - code: MGF-EUEQ

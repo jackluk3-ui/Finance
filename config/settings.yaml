@@ -58,10 +58,13 @@ benchmark_tickers:
 # 系統都會睇住呢啲 ETF，喺報告話畀你聽哪個板塊最近熱
 themes:
   semiconductor:
-    label_zh: "半導體"
-    tickers: [SMH, SOXX, "^SOX"]
+    label_zh: "半導體（全球）"
+    tickers: [SMH, SOXX, "^SOX"]      # 美國上市但持有 TSMC/ASML 等
+  asia_semi:
+    label_zh: "半導體（亞洲核心）"
+    tickers: [EWY, EWT, TSM]          # 韓國 + 台灣 + TSMC ADR — 真正生產基地
   tech:
-    label_zh: "科技板塊"
+    label_zh: "科技板塊（美股）"
     tickers: [QQQ, XLK]
   ai:
     label_zh: "人工智能"

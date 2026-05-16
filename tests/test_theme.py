@@ -25,7 +25,7 @@ def test_theme_spotlight_detects_exposure(loaded_db, sample_funds):
     # We have a fund tagged theme=semiconductor -> has_exposure True
     assert by_key["semiconductor"].has_exposure is True
     # 中文 label populated
-    assert by_key["semiconductor"].label_zh == "半導體"
+    assert "半導體" in by_key["semiconductor"].label_zh
     # tech also has exposure (WTECH fund)
     assert by_key["tech"].has_exposure is True
     # healthcare/energy/etc. have no exposed funds in our sample universe

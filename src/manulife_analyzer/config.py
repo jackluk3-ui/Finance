@@ -118,8 +118,9 @@ class ThemeConfig:
     if the user's fund universe has no exposure to them."""
     themes: dict[str, dict] = field(
         default_factory=lambda: {
-            "semiconductor": {"label_zh": "半導體", "tickers": ["SMH", "SOXX", "^SOX"]},
-            "tech": {"label_zh": "科技板塊", "tickers": ["QQQ", "XLK"]},
+            "semiconductor": {"label_zh": "半導體（全球）", "tickers": ["SMH", "SOXX", "^SOX"]},
+            "asia_semi": {"label_zh": "半導體（亞洲核心）", "tickers": ["EWY", "EWT", "TSM"]},
+            "tech": {"label_zh": "科技板塊（美股）", "tickers": ["QQQ", "XLK"]},
             "ai": {"label_zh": "人工智能", "tickers": ["BOTZ", "AIQ"]},
             "healthcare": {"label_zh": "醫療保健", "tickers": ["XLV", "IBB"]},
             "energy": {"label_zh": "能源", "tickers": ["XLE", "USO"]},

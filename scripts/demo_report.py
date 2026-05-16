@@ -85,9 +85,10 @@ def main() -> None:
         drift, vol = _drift_vol_for(fund)
         db.upsert_prices(_synthetic_prices(fund.code, 400, drift, vol, seed=i + 1))
 
-    # 板塊 ETF 合成價格（半導體最強，跑贏大盤）
+    # 板塊 ETF 合成價格（半導體最強，亞洲半導體更強）
     theme_specs = {
         "SMH": (0.0012, 0.022), "SOXX": (0.0012, 0.022), "^SOX": (0.0012, 0.022),
+        "EWY": (0.0013, 0.020), "EWT": (0.0015, 0.020), "TSM": (0.0016, 0.024),
         "QQQ": (0.0008, 0.016), "XLK": (0.0008, 0.016),
         "AIQ": (0.0007, 0.018), "BOTZ": (0.0007, 0.018),
         "XLV": (0.0003, 0.012), "IBB": (0.0003, 0.014),
