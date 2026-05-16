@@ -1,48 +1,118 @@
-# Pipeline settings. Keys may be overridden by environment variables of the
-# same name in upper-case (e.g. HTTP_TIMEOUT).
+# Pipeline settings. 環境變數可覆蓋同名 key（大寫，例如 HTTP_TIMEOUT）
 
 http:
   timeout: 20
   user_agent: "ManulifeAnalyzer/0.1 (contact: your-email@example.com)"
   cache_hours: 24
-  rate_limit_seconds: 1.5     # min delay between Manulife requests
+  rate_limit_seconds: 1.5
+
+# 宏利香港 ILAS 數據端點配置
+# fundlist_path 對應你提供嘅 URL：
+#   https://www.manulife.com.hk/zh-hk/individual/fund-price/investment-linked-assurance-scheme.html/v2/fundlist?productId=16
+manulife:
+  base_url: "https://www.manulife.com.hk"
+  fundlist_path: "/zh-hk/individual/fund-price/investment-linked-assurance-scheme.html/v2/fundlist"
+  # 歷史 NAV 端點 — 路徑為推測值，第一次抓取失敗會自動嘗試多種變體
+  nav_history_path: "/zh-hk/individual/fund-price/investment-linked-assurance-scheme.html/v2/fundprice"
+  # 要追蹤嘅 ILAS 產品。productId 來自 fund-price 頁嘅 URL 參數
+  products:
+    16: "宏利投資計劃"      # Manulife Investment Plan
+    # 可以加多其他產品，例如：
+    # 17: "宏利投資新領域"
+    # 21: "宏利通"
 
 storage:
   database_path: data/manulife.db
 
-# Lookback windows used in analysis
 analysis:
   return_windows_days: [7, 30, 90, 180, 365]
   volatility_window_days: 30
   sharpe_window_days: 90
-  risk_free_series: DGS3MO    # FRED 3-month Treasury
+  risk_free_series: DGS3MO
   momentum_window_days: 90
   drawdown_window_days: 365
 
-# Macro series to pull from FRED (id -> friendly name)
+# FRED 宏觀數據序列 (id -> 顯示名稱)
 fred_series:
-  DGS10: "US 10Y Treasury Yield"
-  DGS2: "US 2Y Treasury Yield"
-  DGS3MO: "US 3M Treasury Yield"
-  T10Y2Y: "10Y-2Y Yield Curve Spread"
-  CPIAUCSL: "US CPI (All Items)"
-  UNRATE: "US Unemployment Rate"
-  DFF: "Fed Funds Effective Rate"
+  DGS10: "美國 10 年期國債收益率"
+  DGS2: "美國 2 年期國債收益率"
+  DGS3MO: "美國 3 個月國債收益率"
+  T10Y2Y: "美國 10Y-2Y 利差"
+  CPIAUCSL: "美國 CPI"
+  UNRATE: "美國失業率"
+  DFF: "聯邦基金利率"
 
-# Benchmark tickers from Yahoo for the macro context section
+# 整體市場基準（Yahoo ticker）
 benchmark_tickers:
-  - ^GSPC      # S&P 500
-  - ^STOXX50E  # Euro Stoxx 50
-  - ^HSI       # Hang Seng
-  - 000300.SS  # CSI 300
-  - ^N225      # Nikkei 225
-  - AGG        # US Aggregate Bond
-  - HYG        # US High Yield
-  - GLD        # Gold
-  - DX-Y.NYB   # US Dollar Index
+  - ^GSPC        # S&P 500
+  - ^STOXX50E    # 歐洲 Stoxx 50
+  - ^HSI         # 恒生指數
+  - 000300.SS    # 滬深 300
+  - ^N225        # 日經 225
+  - AGG          # 美國綜合債券
+  - HYG          # 美國高收益債
+  - GLD          # 黃金
+  - DX-Y.NYB     # 美元指數
+
+# 板塊主題基準 — 即使你個 fund pool 冇半導體基金，
+# 系統都會睇住呢啲 ETF，喺報告話畀你聽哪個板塊最近熱
+themes:
+  semiconductor:
+    label_zh: "半導體"
+    tickers: [SMH, SOXX, "^SOX"]
+  tech:
+    label_zh: "科技板塊"
+    tickers: [QQQ, XLK]
+  ai:
+    label_zh: "人工智能"
+    tickers: [BOTZ, AIQ]
+  healthcare:
+    label_zh: "醫療保健"
+    tickers: [XLV, IBB]
+  energy:
+    label_zh: "能源"
+    tickers: [XLE, USO]
+  china_tech:
+    label_zh: "中概科技"
+    tickers: [KWEB, MCHI]
+  gold:
+    label_zh: "黃金"
+    tickers: [GLD]
+
+# 投資組合建議（4 個時間框架）
+portfolios:
+  "1m":
+    label_zh: "短炒組合（1個月）"
+    n_funds: 3
+    equity_max: 1.0
+    bond_min: 0.0
+    scoring: momentum_30d
+    description_zh: "以最近30日表現排名揀基金，波動風險高，適合短線進取客戶"
+  "3m":
+    label_zh: "短中線組合（3個月）"
+    n_funds: 5
+    equity_max: 0.8
+    bond_min: 0.1
+    scoring: momentum_90d
+    description_zh: "結合30日加90日動量，加入少量債券對沖波動"
+  "1y":
+    label_zh: "中長線組合（1年）"
+    n_funds: 6
+    equity_max: 0.7
+    bond_min: 0.2
+    scoring: sharpe_90d
+    description_zh: "以風險調整後回報（夏普比率）排名，分散行業同地區"
+  long_term:
+    label_zh: "長線組合（5年以上）"
+    n_funds: 8
+    equity_max: 0.6
+    bond_min: 0.3
+    scoring: diversified
+    description_zh: "策略性資產配置，跨資產類別分散，控制最大回撤"
 
 reports:
   output_dir: data/reports
+  language: zh-HK              # zh-HK / en
   weekly:
     lookback_days: 7
     top_n_funds: 5

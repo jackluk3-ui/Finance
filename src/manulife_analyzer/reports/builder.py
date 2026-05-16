@@ -10,9 +10,10 @@ import pandas as pd
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from ..analysis import (
+    build_all_portfolios,
+    build_theme_spotlights,
     compute_fund_metrics,
     summarize_macro,
-    screen_funds,
 )
 from ..analysis.metrics import metrics_to_rows
 from ..config import Settings
@@ -21,6 +22,16 @@ from .charts import macro_chart, return_bar_chart
 
 TEMPLATE_DIR = Path(__file__).parent / "templates"
 ReportKind = Literal["weekly", "monthly"]
+
+# 顯示順序
+PORTFOLIO_ORDER = ["1m", "3m", "1y", "long_term"]
+
+# FRED series id -> 中文圖表標題 / 縱軸標籤
+MACRO_CHART_LABELS = {
+    "T10Y2Y": ("美國 10Y-2Y 國債利差 (%)", "利差 (%)"),
+    "CPIAUCSL": ("美國消費物價指數 (CPI)", "指數"),
+    "DFF": ("聯邦基金有效利率 (%)", "%"),
+}
 
 
 def _env() -> Environment:
@@ -31,7 +42,7 @@ def _env() -> Environment:
 
 
 def _ensure_metrics(db: Database, settings: Settings) -> None:
-    """Compute metrics for every tracked fund and persist them."""
+    """Compute metrics for every tracked symbol (funds + benchmarks + themes)."""
     prices = db.prices_df()
     if prices.empty:
         return
@@ -39,12 +50,16 @@ def _ensure_metrics(db: Database, settings: Settings) -> None:
     a = settings.analysis
     risk_free_annual = _latest_risk_free(db, a.risk_free_series)
 
+    # Compute metrics for funds AND for every benchmark / theme ticker we have
+    # prices on so the theme spotlight can use them.
+    symbols = set(f.code for f in settings.funds) | set(prices["symbol"].unique())
+
     rows: list[tuple] = []
-    for fund in settings.funds:
-        slice_ = prices[prices["symbol"] == fund.code]
+    for symbol in symbols:
+        slice_ = prices[prices["symbol"] == symbol]
         m = compute_fund_metrics(
             slice_,
-            symbol=fund.code,
+            symbol=symbol,
             return_windows=a.return_windows_days,
             vol_window=a.volatility_window_days,
             sharpe_window=a.sharpe_window_days,
@@ -56,7 +71,6 @@ def _ensure_metrics(db: Database, settings: Settings) -> None:
         rows.extend(metrics_to_rows(m))
 
     if rows:
-        # rows are (symbol, metric, date, value); db expects date object
         prepared = [(s, mn, _to_date(a), v) for s, mn, a, v in rows]
         db.upsert_metrics(prepared)
 
@@ -99,8 +113,10 @@ def _fund_table_rows(db: Database, settings: Settings, lookback_days: int) -> li
         rows.append(
             {
                 "name": fund.name,
+                "name_zh": fund.name_zh,
                 "category": fund.category,
                 "region": fund.region,
+                "theme": fund.theme,
                 "return_pct": _f(r.get(return_col)),
                 "return_180d": _f(r.get(return_180_col)),
                 "vol": _f(r.get("vol_30d_annualised")),
@@ -120,17 +136,12 @@ def _f(value) -> float | None:
     return v if v == v else None
 
 
-def _macro_charts(db: Database, settings: Settings) -> list[str]:
+def _macro_charts(db: Database) -> list[str]:
     df = db.macro_df()
     if df.empty:
         return []
     charts: list[str] = []
-    plots = [
-        ("T10Y2Y", "US 10Y-2Y Yield Spread (%)", "spread (%)"),
-        ("CPIAUCSL", "US CPI (level)", "index"),
-        ("DFF", "Fed Funds Effective Rate (%)", "%"),
-    ]
-    for sid, title, ylabel in plots:
+    for sid, (title, ylabel) in MACRO_CHART_LABELS.items():
         sub = df[df["series_id"] == sid].sort_values("asof")
         if sub.empty:
             continue
@@ -143,16 +154,21 @@ def _return_chart(table_rows: list[dict], title: str) -> str | None:
     rows = [r for r in table_rows if r["return_pct"] is not None]
     if not rows:
         return None
-    df = pd.DataFrame(rows)
-    return return_bar_chart(df, value_col="return_pct", label_col="name", title=title)
+    df = pd.DataFrame(
+        [{"label": r["name_zh"] or r["name"], "return_pct": r["return_pct"]} for r in rows]
+    )
+    return return_bar_chart(df, value_col="return_pct", label_col="label", title=title)
 
 
-def _volatility_alert(table_rows: list[dict], threshold_change: float = 0.05) -> str | None:
+def _volatility_alert(table_rows: list[dict]) -> str | None:
     high_vol = [r for r in table_rows if (r["vol"] or 0) > 0.25]
     if not high_vol:
         return None
-    names = ", ".join(r["name"] for r in high_vol[:3])
-    return f"{len(high_vol)} fund(s) showing annualised vol > 25% — review concentration in {names}."
+    names = "、".join((r["name_zh"] or r["name"]) for r in high_vol[:3])
+    return (
+        f"有 {len(high_vol)} 隻基金年化波動超過 25% — "
+        f"留意倉位集中度（例如：{names}）。"
+    )
 
 
 def build_report(
@@ -170,25 +186,29 @@ def build_report(
     metrics = db.metrics_df()
     macro = summarize_macro(db.macro_df())
     fund_table = _fund_table_rows(db, settings, window.lookback_days)
-    return_chart = _return_chart(fund_table, f"Returns over last {window.lookback_days} days")
+    return_chart = _return_chart(
+        fund_table, f"基金過去 {window.lookback_days} 日回報"
+    )
 
-    candidates_short = screen_funds(metrics, settings.funds, window.top_n_funds, "short_term")
+    themes = build_theme_spotlights(metrics, settings.themes.themes, settings.funds)
+    portfolios = build_all_portfolios(
+        metrics, settings.funds, settings.portfolios.horizons
+    )
+
+    title = ("每週" if kind == "weekly" else "每月") + "市場觀察報告"
 
     context: dict = {
-        "title": ("Weekly" if kind == "weekly" else "Monthly")
-        + " Market Observation Report",
+        "title": title,
         "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "lookback_days": window.lookback_days,
         "fund_count": len(settings.funds),
         "macro": macro,
-        "macro_charts": _macro_charts(db, settings),
+        "macro_charts": _macro_charts(db),
         "fund_table": fund_table,
         "return_chart": return_chart,
-        "candidates": candidates_short,
-        "candidates_short": candidates_short,
-        "candidates_long": screen_funds(
-            metrics, settings.funds, window.top_n_funds, "long_term"
-        ),
+        "themes": themes,
+        "portfolios": portfolios,
+        "portfolio_order": PORTFOLIO_ORDER,
         "volatility_alert": _volatility_alert(fund_table),
     }
 

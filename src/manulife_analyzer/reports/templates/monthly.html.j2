@@ -1,44 +1,84 @@
 {% extends "base.html.j2" %}
 
 {% block content %}
-<h2>Executive summary</h2>
+<h2>月度摘要</h2>
 <div class="commentary">
   <ul>
     {% for line in macro.commentary %}<li>{{ line }}</li>{% endfor %}
-    {% if volatility_alert %}<li><strong>Volatility alert:</strong> {{ volatility_alert }}</li>{% endif %}
+    {% if volatility_alert %}<li><strong>波動提示：</strong>{{ volatility_alert }}</li>{% endif %}
   </ul>
 </div>
 
-<h2>Global macro context</h2>
+<h2>板塊熱度（基準 ETF）</h2>
+<p class="muted">
+  以下板塊基準作市場熱度參考。「⚠️」表示板塊強勢但客戶基金池冇相關曝險。
+</p>
+<table>
+  <thead>
+    <tr>
+      <th>板塊</th>
+      <th class="num">30日</th>
+      <th class="num">90日</th>
+      <th class="num">180日</th>
+      <th>客戶曝險</th>
+      <th>評語</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for t in themes %}
+    <tr>
+      <td><strong>{{ t.label_zh }}</strong>
+        <span class="muted">({{ t.tickers | join(', ') }})</span></td>
+      <td class="num {{ 'pos' if t.return_30d and t.return_30d >= 0 else 'neg' }}">
+        {{ "{:+.1f}%".format(t.return_30d * 100) if t.return_30d is not none else "—" }}
+      </td>
+      <td class="num {{ 'pos' if t.return_90d and t.return_90d >= 0 else 'neg' }}">
+        {{ "{:+.1f}%".format(t.return_90d * 100) if t.return_90d is not none else "—" }}
+      </td>
+      <td class="num {{ 'pos' if t.return_180d and t.return_180d >= 0 else 'neg' }}">
+        {{ "{:+.1f}%".format(t.return_180d * 100) if t.return_180d is not none else "—" }}
+      </td>
+      <td>{% if t.has_exposure %}✅{% elif t.return_30d and t.return_30d > 0.05 %}⚠️{% else %}—{% endif %}</td>
+      <td><span class="muted">{{ t.commentary_zh }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>全球宏觀環境</h2>
 {% if macro_charts %}
   {% for chart in macro_charts %}
-    <img class="chart" src="{{ chart }}" alt="macro chart">
+    <img class="chart" src="{{ chart }}" alt="宏觀圖">
   {% endfor %}
 {% else %}
-  <p>No FRED data loaded.</p>
+  <p>暫無 FRED 數據。</p>
 {% endif %}
 
-<h2>Fund performance — last {{ lookback_days }} days</h2>
+<h2>基金表現一覽 — 過去 {{ lookback_days }} 日</h2>
 {% if return_chart %}
-  <img class="chart" src="{{ return_chart }}" alt="returns">
+  <img class="chart" src="{{ return_chart }}" alt="回報圖">
 {% endif %}
 <table>
   <thead>
     <tr>
-      <th>Fund</th>
-      <th>Category</th>
-      <th class="num">Return ({{ lookback_days }}D)</th>
-      <th class="num">YTD-ish (180D)</th>
-      <th class="num">Vol (ann.)</th>
-      <th class="num">Sharpe 90D</th>
-      <th class="num">Max DD 1Y</th>
+      <th>基金</th>
+      <th>類別</th>
+      <th class="num">{{ lookback_days }}日</th>
+      <th class="num">180日</th>
+      <th class="num">年化波動</th>
+      <th class="num">夏普 90D</th>
+      <th class="num">1年最大回撤</th>
     </tr>
   </thead>
   <tbody>
     {% for row in fund_table %}
     <tr>
-      <td>{{ row.name }}</td>
-      <td><span class="badge">{{ row.category }}</span><span class="badge">{{ row.region }}</span></td>
+      <td>{{ row.name_zh or row.name }}</td>
+      <td>
+        <span class="badge">{{ row.category }}</span>
+        <span class="badge">{{ row.region }}</span>
+        {% if row.theme %}<span class="badge badge-theme">{{ row.theme }}</span>{% endif %}
+      </td>
       <td class="num {{ 'pos' if row.return_pct and row.return_pct >= 0 else 'neg' }}">
         {{ "{:+.2f}%".format(row.return_pct * 100) if row.return_pct is not none else "—" }}
       </td>
@@ -53,29 +93,12 @@
   </tbody>
 </table>
 
-<h2>Short-term screening candidates</h2>
-<table>
-  <thead><tr><th>#</th><th>Fund</th><th class="num">Score</th><th>Notes</th></tr></thead>
-  <tbody>
-    {% for r in candidates_short %}
-    <tr>
-      <td>{{ loop.index }}</td><td>{{ r.name }}</td>
-      <td class="num">{{ "{:.2f}".format(r.score) }}</td><td>{{ r.rationale }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-
-<h2>Risk-adjusted candidates (longer horizon)</h2>
-<table>
-  <thead><tr><th>#</th><th>Fund</th><th class="num">Score</th><th>Notes</th></tr></thead>
-  <tbody>
-    {% for r in candidates_long %}
-    <tr>
-      <td>{{ loop.index }}</td><td>{{ r.name }}</td>
-      <td class="num">{{ "{:.2f}".format(r.score) }}</td><td>{{ r.rationale }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<h2>四個時間框架嘅組合建議</h2>
+<p class="muted">
+  以下組合根據基金近期表現同你個 fund pool 自動生成。<strong>屬候選清單，最終建議由顧問簽字。</strong>
+</p>
+{% for key in portfolio_order if key in portfolios %}
+  {% set portfolio = portfolios[key] %}
+  {% include "_portfolio_section.html.j2" %}
+{% endfor %}
 {% endblock %}

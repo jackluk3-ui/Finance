@@ -1,72 +1,281 @@
-# Manulife-linked fund universe to track.
-# Add / remove funds to match the ILAS or savings-plan menus your clients hold.
-# ISIN can be looked up on each fund's Product Information Booklet (PIB).
-# `benchmark` is a Yahoo Finance ticker used for relative-strength comparisons.
+# 宏利投資計劃（productId=16）常見底層基金清單
+#
+# 注意：呢度嘅 ISIN 係佔位符（placeholder），用嚟畀系統先跑起。
+# 行 `uv run manulife discover --product-id 16` 可以由宏利官方 API
+# 自動下載最新真實清單覆蓋呢個檔案。
+#
+# 欄位：
+#   code        系統內部代號
+#   isin        基金 ISIN（用嚟對應宏利 API 同 PIB）
+#   name        英文全名
+#   name_zh     中文名（顯示喺報告）
+#   category    equity / bond / balanced / money_market / multi_asset
+#   region      us / asia / greater_china / japan / europe / global / emerging
+#   currency    USD / HKD / EUR / JPY
+#   benchmark   Yahoo Finance ticker，作歷史回報基準（如未抓到宏利歷史 NAV 用呢個替代）
+#   theme       板塊主題（可選）：semiconductor / tech / ai / healthcare / energy / esg
+#   risk_level  宏利風險評級 1-5（5 最高）
 
 funds:
+  # ── 美國股票 ───────────────────────────────────────────────
   - code: MGF-USEQ
-    isin: HK0000056226
-    name: Manulife Global Fund - US Equity
+    isin: PLACEHOLDER-MGF-USEQ
+    name: Manulife Global Fund - U.S. Equity
+    name_zh: 宏利環球基金 - 美國股票
     category: equity
     region: us
     currency: USD
     benchmark: ^GSPC
+    risk_level: 5
+  - code: MGF-USSO
+    isin: PLACEHOLDER-MGF-USSO
+    name: Manulife Global Fund - U.S. Special Opportunities
+    name_zh: 宏利環球基金 - 美國特別機會
+    category: equity
+    region: us
+    currency: USD
+    benchmark: ^RUT
+    risk_level: 5
 
+  # ── 科技 / 半導體 / AI ────────────────────────────────────
+  - code: BGF-WTECH
+    isin: PLACEHOLDER-BGF-WTECH
+    name: BlackRock Global Funds - World Technology
+    name_zh: 貝萊德世界科技基金
+    category: equity
+    region: global
+    currency: USD
+    benchmark: QQQ
+    theme: tech
+    risk_level: 5
+  - code: FID-GTECH
+    isin: PLACEHOLDER-FID-GTECH
+    name: Fidelity Global Technology
+    name_zh: 富達環球科技基金
+    category: equity
+    region: global
+    currency: USD
+    benchmark: XLK
+    theme: tech
+    risk_level: 5
+  - code: ALL-AIGT
+    isin: PLACEHOLDER-ALL-AIGT
+    name: Allianz Global Artificial Intelligence
+    name_zh: 安聯環球人工智能基金
+    category: equity
+    region: global
+    currency: USD
+    benchmark: AIQ
+    theme: ai
+    risk_level: 5
+  - code: JPM-USTECH
+    isin: PLACEHOLDER-JPM-USTECH
+    name: JPMorgan US Technology
+    name_zh: 摩根美國科技基金
+    category: equity
+    region: us
+    currency: USD
+    benchmark: SMH        # 半導體佔比較重
+    theme: semiconductor
+    risk_level: 5
+
+  # ── 大中華 / 中國 ────────────────────────────────────────
   - code: MGF-GREQ
-    isin: HK0000056234
+    isin: PLACEHOLDER-MGF-GREQ
     name: Manulife Global Fund - Greater China Equity
+    name_zh: 宏利環球基金 - 大中華股票
     category: equity
     region: greater_china
     currency: USD
     benchmark: 000300.SS
-
-  - code: MGF-EUEQ
-    isin: HK0000056242
-    name: Manulife Global Fund - European Growth
+    risk_level: 5
+  - code: MGF-CHVAL
+    isin: PLACEHOLDER-MGF-CHVAL
+    name: Manulife Global Fund - China Value
+    name_zh: 宏利環球基金 - 中國價值
     category: equity
-    region: europe
-    currency: EUR
-    benchmark: ^STOXX50E
+    region: greater_china
+    currency: USD
+    benchmark: MCHI
+    risk_level: 5
+  - code: MGF-INDIA
+    isin: PLACEHOLDER-MGF-INDIA
+    name: Manulife Global Fund - India Equity
+    name_zh: 宏利環球基金 - 印度股票
+    category: equity
+    region: emerging
+    currency: USD
+    benchmark: INDA
+    risk_level: 5
 
+  # ── 亞洲 / 日本 ───────────────────────────────────────────
   - code: MGF-ASEQ
-    isin: HK0000056259
+    isin: PLACEHOLDER-MGF-ASEQ
     name: Manulife Global Fund - Asia Pacific ex-Japan Equity
+    name_zh: 宏利環球基金 - 亞太區（日本除外）股票
     category: equity
     region: asia_ex_japan
     currency: USD
     benchmark: AAXJ
+    risk_level: 4
+  - code: MGF-JPEQ
+    isin: PLACEHOLDER-MGF-JPEQ
+    name: Manulife Global Fund - Japan Equity
+    name_zh: 宏利環球基金 - 日本股票
+    category: equity
+    region: japan
+    currency: USD
+    benchmark: EWJ
+    risk_level: 4
 
+  # ── 歐洲 ─────────────────────────────────────────────────
+  - code: MGF-EUEQ
+    isin: PLACEHOLDER-MGF-EUEQ
+    name: Manulife Global Fund - European Growth
+    name_zh: 宏利環球基金 - 歐洲增長
+    category: equity
+    region: europe
+    currency: EUR
+    benchmark: ^STOXX50E
+    risk_level: 4
+
+  # ── 行業主題 ─────────────────────────────────────────────
+  - code: MGF-HLTH
+    isin: PLACEHOLDER-MGF-HLTH
+    name: Manulife Global Fund - Healthcare
+    name_zh: 宏利環球基金 - 健康護理
+    category: equity
+    region: global
+    currency: USD
+    benchmark: XLV
+    theme: healthcare
+    risk_level: 5
+  - code: MGF-INFRA
+    isin: PLACEHOLDER-MGF-INFRA
+    name: Manulife Global Fund - Global Infrastructure
+    name_zh: 宏利環球基金 - 環球基建
+    category: equity
+    region: global
+    currency: USD
+    benchmark: IGF
+    risk_level: 4
+  - code: BGF-WGOLD
+    isin: PLACEHOLDER-BGF-WGOLD
+    name: BlackRock Global Funds - World Gold
+    name_zh: 貝萊德世界黃金基金
+    category: equity
+    region: global
+    currency: USD
+    benchmark: GDX
+    theme: gold
+    risk_level: 5
+  - code: BGF-WMIN
+    isin: PLACEHOLDER-BGF-WMIN
+    name: BlackRock Global Funds - World Mining
+    name_zh: 貝萊德世界礦業基金
+    category: equity
+    region: global
+    currency: USD
+    benchmark: XME
+    theme: energy
+    risk_level: 5
+  - code: MGF-RES
+    isin: PLACEHOLDER-MGF-RES
+    name: Manulife Global Fund - Global Resources
+    name_zh: 宏利環球基金 - 環球資源
+    category: equity
+    region: global
+    currency: USD
+    benchmark: XLE
+    theme: energy
+    risk_level: 5
+
+  # ── ESG / 可持續 ──────────────────────────────────────────
+  - code: MGF-SUSAP
+    isin: PLACEHOLDER-MGF-SUSAP
+    name: Manulife Global Fund - Sustainable Asia Pacific Asset Allocation
+    name_zh: 宏利環球基金 - 可持續亞太區資產配置
+    category: multi_asset
+    region: asia
+    currency: USD
+    benchmark: AAXJ
+    theme: esg
+    risk_level: 3
+
+  # ── 債券 ─────────────────────────────────────────────────
   - code: MGF-GLBD
-    isin: HK0000056267
+    isin: PLACEHOLDER-MGF-GLBD
     name: Manulife Global Fund - Global Bond
+    name_zh: 宏利環球基金 - 環球債券
     category: bond
     region: global
     currency: USD
     benchmark: AGG
-
+    risk_level: 2
   - code: MGF-USHY
-    isin: HK0000056275
-    name: Manulife Global Fund - US High Yield Bond
+    isin: PLACEHOLDER-MGF-USHY
+    name: Manulife Global Fund - U.S. High Yield Bond
+    name_zh: 宏利環球基金 - 美國高收益債券
     category: bond
     region: us
     currency: USD
     benchmark: HYG
-
+    risk_level: 3
   - code: MGF-ASBD
-    isin: HK0000056283
-    name: Manulife Global Fund - Asian High Yield Bond
+    isin: PLACEHOLDER-MGF-ASBD
+    name: Manulife Global Fund - Asian Bond
+    name_zh: 宏利環球基金 - 亞洲債券
     category: bond
     region: asia
     currency: USD
-    benchmark: EMHY
+    benchmark: EMB
+    risk_level: 3
+  - code: PIMCO-INC
+    isin: PLACEHOLDER-PIMCO-INC
+    name: PIMCO Income Fund
+    name_zh: PIMCO 收益基金
+    category: bond
+    region: global
+    currency: USD
+    benchmark: BND
+    risk_level: 2
 
-  - code: MGF-MIX50
-    isin: HK0000056291
-    name: Manulife Global Fund - Balanced (50/50)
+  # ── 平衡 / 多元資產 ──────────────────────────────────────
+  - code: MGF-BAL
+    isin: PLACEHOLDER-MGF-BAL
+    name: Manulife Global Fund - Balanced
+    name_zh: 宏利環球基金 - 平衡
     category: balanced
     region: global
     currency: USD
     benchmark: AOR
+    risk_level: 3
+  - code: BGF-GLBALLOC
+    isin: PLACEHOLDER-BGF-GLBALLOC
+    name: BlackRock Global Funds - Global Allocation
+    name_zh: 貝萊德環球資產配置基金
+    category: multi_asset
+    region: global
+    currency: USD
+    benchmark: AOR
+    risk_level: 3
 
-# NOTE: ISINs above are illustrative placeholders. Replace each with the real
-# ISIN from the fund's PIB before going live.
+  # ── 貨幣市場 ─────────────────────────────────────────────
+  - code: CASH-USD
+    isin: PLACEHOLDER-CASH-USD
+    name: USD Cash
+    name_zh: 美元現金
+    category: money_market
+    region: us
+    currency: USD
+    benchmark: BIL
+    risk_level: 1
+  - code: CASH-HKD
+    isin: PLACEHOLDER-CASH-HKD
+    name: HKD Cash
+    name_zh: 港元現金
+    category: money_market
+    region: asia
+    currency: HKD
+    benchmark: BIL
+    risk_level: 1

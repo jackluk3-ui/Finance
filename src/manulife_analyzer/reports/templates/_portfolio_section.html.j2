@@ -1,0 +1,53 @@
+{# 公用組件：顯示一個組合 #}
+<div class="portfolio-card">
+  <h3>{{ portfolio.label }}</h3>
+  <p class="muted">{{ portfolio.description }}</p>
+  <ul>
+    {% for line in portfolio.rationale %}<li>{{ line }}</li>{% endfor %}
+    {% if portfolio.expected_vol is not none %}
+      <li>預期年化波動率：約 {{ "{:.1f}%".format(portfolio.expected_vol * 100) }}</li>
+    {% endif %}
+    {% if portfolio.expected_return_annual is not none %}
+      <li>近 90 日年化回報估算：{{ "{:+.1f}%".format(portfolio.expected_return_annual * 100) }}
+          <span class="muted">（僅供參考，非未來預測）</span></li>
+    {% endif %}
+  </ul>
+
+  <table>
+    <thead>
+      <tr>
+        <th>基金</th>
+        <th>類別</th>
+        <th class="num">建議比重</th>
+        <th class="num">30日</th>
+        <th class="num">90日</th>
+        <th class="num">夏普 90D</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for h in portfolio.holdings %}
+      <tr>
+        <td>
+          {{ h.name_zh }}
+          {% if h.theme %}<span class="badge badge-theme">{{ h.theme }}</span>{% endif %}
+        </td>
+        <td>
+          <span class="badge">{{ h.category }}</span>
+          <span class="badge">{{ h.region }}</span>
+        </td>
+        <td class="num">
+          {{ "{:.1f}%".format(h.weight * 100) }}
+          <span class="weight-bar" style="width: {{ (h.weight * 200) | round(0) }}px;"></span>
+        </td>
+        <td class="num {{ 'pos' if h.return_30d and h.return_30d >= 0 else 'neg' }}">
+          {{ "{:+.1f}%".format(h.return_30d * 100) if h.return_30d is not none else "—" }}
+        </td>
+        <td class="num {{ 'pos' if h.return_90d and h.return_90d >= 0 else 'neg' }}">
+          {{ "{:+.1f}%".format(h.return_90d * 100) if h.return_90d is not none else "—" }}
+        </td>
+        <td class="num">{{ "{:.2f}".format(h.sharpe_90d) if h.sharpe_90d is not none else "—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

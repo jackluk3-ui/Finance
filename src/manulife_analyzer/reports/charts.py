@@ -1,4 +1,7 @@
-"""Matplotlib chart helpers — render to base64 PNG for inline HTML embed."""
+"""Matplotlib chart helpers — render to base64 PNG for inline HTML embed.
+
+Configures a CJK-capable font so Chinese titles/labels render correctly.
+"""
 
 from __future__ import annotations
 
@@ -9,7 +12,34 @@ import matplotlib
 
 matplotlib.use("Agg")  # headless
 import matplotlib.pyplot as plt
+from matplotlib import font_manager
 import pandas as pd
+
+
+# 嘗試用 CJK 字體（系統一般裝咗 WenQuanYi / Noto CJK 其中一個）
+_CJK_FONT_CANDIDATES = [
+    "WenQuanYi Zen Hei",
+    "Noto Sans CJK TC",
+    "Noto Sans CJK SC",
+    "Noto Sans CJK HK",
+    "PingFang HK",
+    "Microsoft JhengHei",
+    "Heiti TC",
+]
+
+
+def _configure_font() -> None:
+    available = {f.name for f in font_manager.fontManager.ttflist}
+    for name in _CJK_FONT_CANDIDATES:
+        if name in available:
+            plt.rcParams["font.sans-serif"] = [name, "DejaVu Sans"]
+            plt.rcParams["axes.unicode_minus"] = False
+            return
+    # fall back silently if no CJK font available
+    plt.rcParams["axes.unicode_minus"] = False
+
+
+_configure_font()
 
 
 def _to_data_uri(fig) -> str:
@@ -34,7 +64,7 @@ def return_bar_chart(df: pd.DataFrame, value_col: str, label_col: str, title: st
     ax.barh(df[label_col], df[value_col] * 100, color=colors)
     ax.set_title(title, fontsize=11)
     ax.axvline(0, color="#333", linewidth=0.8)
-    ax.set_xlabel("Return (%)")
+    ax.set_xlabel("回報率 (%)")
     ax.grid(True, axis="x", linestyle="--", alpha=0.4)
     ax.invert_yaxis()
     return _to_data_uri(fig)
